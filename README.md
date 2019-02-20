@@ -51,5 +51,5 @@ For a full demo, best deploy a client sample app (see below) that will act as th
 - Client (React & Redux):https://github.com/swisscom/sample-uaa-react-redux-client
 - Client (AngularJS): https://github.com/swisscom/sample-uaa-angular-client
 
-- Resource Server (Spring boot): https://github.com/swisscom/sample-uaa-spring-boot-resource-server"
+- Resource Server (Spring boot): https://github.com/swisscom/sample-uaa-spring-boot-resource-server
 - Resource Server (Ruby): https://github.com/swisscom/sample-uaa-ruby-resource-server
