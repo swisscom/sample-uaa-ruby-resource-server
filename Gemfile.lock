@@ -38,7 +38,7 @@ DEPENDENCIES
   sinatra
 
 RUBY VERSION
-   ruby 2.5.7
+   ruby 2.7.4
 
 BUNDLED WITH
    1.17.1
