@@ -4,8 +4,9 @@ source "https://rubygems.org"
 
 git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
-ruby '2.7.4'
+ruby '~> 4.0.10'
 
 gem 'sinatra'
 gem 'rack-cors'
-gem 'rest-client'
+gem 'rackup'
+gem 'webrick'

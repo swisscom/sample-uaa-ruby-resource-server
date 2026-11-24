@@ -2,6 +2,7 @@
 applications:
 - memory: 256M
   instances: 2
-  buildpack: https://github.com/cloudfoundry/ruby-buildpack
+  buildpacks:
+  - https://github.com/cloudfoundry/ruby-buildpack#v1.11.5
   env:
-    ALLOWED_CORS_ORIGIN: your-client-app.com
+    ALLOWED_CORS_ORIGIN: https://your-client-app.com

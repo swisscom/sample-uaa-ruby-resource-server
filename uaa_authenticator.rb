@@ -1,7 +1,10 @@
-require 'rest-client'
+require 'net/http'
 require 'json'
 
 class UaaAuthenticator
+  HTTP_OPEN_TIMEOUT = 10
+  HTTP_READ_TIMEOUT = 60
+
   def initialize(app, options = {})
     @app = app
     @logger = options.fetch(:logger)
@@ -35,31 +38,47 @@ class UaaAuthenticator
   end
 
   def check_token(token)
-    begin
-      JSON.parse(
-          RestClient::Request.execute(
-              method: :post,
-              url: @check_token_endpoint,
-              user: @client_id,
-              password: @client_secret,
-              payload: {
-                  token: token
-              })
-      )
-    rescue RestClient::BadRequest => e
-      @logger.warn "Token validation failed: #{e.response}"
-      nil
+    response = post_form(@check_token_endpoint, { token: token }, basic_auth: [@client_id, @client_secret])
+    if response.is_a?(Net::HTTPBadRequest)
+      @logger.warn "Token validation failed: #{response.body}"
+      return nil
     end
+    JSON.parse(ensure_success!(response).body)
   end
 
   def user_info(token)
-    JSON.parse(
-        RestClient::Request.execute(
-            method: :get,
-            url: @user_info_endpoint,
-            headers: {
-                'Authorization' => "Bearer #{token}"
-            }
-        ))
+    response = get(@user_info_endpoint, 'Authorization' => "Bearer #{token}")
+    JSON.parse(ensure_success!(response).body)
+  end
+
+  private
+
+  def post_form(url, form, basic_auth:)
+    uri = URI(url)
+    request = Net::HTTP::Post.new(uri)
+    request.basic_auth(*basic_auth)
+    request.set_form_data(form)
+    perform(uri, request)
+  end
+
+  def get(url, headers)
+    uri = URI(url)
+    request = Net::HTTP::Get.new(uri)
+    headers.each { |name, value| request[name] = value }
+    perform(uri, request)
+  end
+
+  def perform(uri, request)
+    request['Accept'] = 'application/json'
+    Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https',
+                    open_timeout: HTTP_OPEN_TIMEOUT, read_timeout: HTTP_READ_TIMEOUT) do |http|
+      http.request(request)
+    end
+  end
+
+  def ensure_success!(response)
+    return response if response.is_a?(Net::HTTPSuccess)
+
+    raise "UAA request failed with HTTP #{response.code}: #{response.body}"
   end
 end
