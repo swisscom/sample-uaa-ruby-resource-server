@@ -6,7 +6,7 @@ require_relative 'uaa_authenticator'
 
 logger = Logger.new(STDERR)
 
-service = JSON.parse(ENV['VCAP_SERVICES'] || '{}').values.flatten.first{|service|service['tags'].include 'oauth2'}
+service = JSON.parse(ENV['VCAP_SERVICES'] || '{}').values.flatten.find { |s| Array(s['tags']).include?('oauth2') }
 raise 'please bind UAA service to app' if service.nil?
 
 use UaaAuthenticator, logger: logger,
